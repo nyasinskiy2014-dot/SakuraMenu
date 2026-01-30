@@ -1,17 +1,11 @@
--- 🌸 Sakura Menu Fixed | Delta / Heno / Skibix iOS
+-- 🌸 Sakura Menu | iOS Fixed Full Version
 
 -- ===== GUI PARENT (Skibix-safe) =====
 local function getGuiParent()
-	local ok, cg = pcall(function()
-		return game:GetService("CoreGui")
-	end)
+	local ok, cg = pcall(function() return game:GetService("CoreGui") end)
 	if ok and cg then return cg end
-
-	local ok2, hui = pcall(function()
-		return gethui()
-	end)
+	local ok2, hui = pcall(function() return gethui() end)
 	if ok2 and hui then return hui end
-
 	return game:GetService("Players").LocalPlayer:WaitForChild("PlayerGui")
 end
 
@@ -37,8 +31,8 @@ pcall(function() if protect_gui then protect_gui(gui) end end)
 
 -- MAIN FRAME
 local main = Instance.new("Frame", gui)
-main.Size = UDim2.fromOffset(430,270)
-main.Position = UDim2.new(0.5,-215,0.5,-135)
+main.Size = UDim2.fromOffset(450,300)
+main.Position = UDim2.new(0.5,-225,0.5,-150)
 main.BackgroundColor3 = Color3.fromRGB(255,220,230)
 main.BorderSizePixel = 0
 Instance.new("UICorner", main).CornerRadius = UDim.new(0,16)
@@ -103,7 +97,6 @@ flyBtn.MouseButton1Click:Connect(function()
 	flyVel.Enabled = fly
 end)
 
--- Fly speed текст
 local flyLabel = Instance.new("TextLabel", main)
 flyLabel.Size = UDim2.fromOffset(180,20)
 flyLabel.Position = UDim2.fromOffset(20,95)
@@ -112,7 +105,6 @@ flyLabel.TextColor3 = Color3.fromRGB(120,60,80)
 flyLabel.TextScaled = true
 flyLabel.Text = "Fly Speed: "..flySpeed
 
--- Fly speed регулятор
 local flyBox = Instance.new("TextBox", main)
 flyBox.Size = UDim2.fromOffset(180,20)
 flyBox.Position = UDim2.fromOffset(20,115)
@@ -146,8 +138,7 @@ end)
 
 -- ===== SPEED BOOST =====
 local speedBoost = false
-local boostSpeed = 16 -- обычная скорость
-
+local boostSpeed = 16
 local speedBtn = Instance.new("TextButton", main)
 speedBtn.Size = UDim2.fromOffset(180,32)
 speedBtn.Position = UDim2.fromOffset(220,60)
@@ -187,4 +178,87 @@ speedBox.FocusLost:Connect(function()
 	else
 		speedBox.Text = tostring(boostSpeed)
 	end
+end)
+
+-- ===== HIGH JUMP =====
+local jumpBtn = Instance.new("TextButton", main)
+jumpBtn.Size = UDim2.fromOffset(180,32)
+jumpBtn.Position = UDim2.fromOffset(20,150)
+jumpBtn.Text = "High Jump"
+jumpBtn.BackgroundColor3 = Color3.fromRGB(200,180,255)
+jumpBtn.TextColor3 = Color3.new(1,1,1)
+Instance.new("UICorner", jumpBtn)
+
+local jumpPower = 50
+local highJump = false
+
+jumpBtn.MouseButton1Click:Connect(function()
+	highJump = not highJump
+	jumpBtn.Text = highJump and "High Jump: ON" or "High Jump: OFF"
+	hum.JumpPower = highJump and jumpPower or 50
+end)
+
+local jumpLabel = Instance.new("TextLabel", main)
+jumpLabel.Size = UDim2.fromOffset(180,20)
+jumpLabel.Position = UDim2.fromOffset(20,185)
+jumpLabel.BackgroundTransparency = 1
+jumpLabel.TextColor3 = Color3.fromRGB(120,60,80)
+jumpLabel.TextScaled = true
+jumpLabel.Text = "Jump Power: "..jumpPower
+
+local jumpBox = Instance.new("TextBox", main)
+jumpBox.Size = UDim2.fromOffset(180,20)
+jumpBox.Position = UDim2.fromOffset(20,205)
+jumpBox.BackgroundColor3 = Color3.fromRGB(230,200,255)
+jumpBox.TextColor3 = Color3.new(1,1,1)
+jumpBox.Text = tostring(jumpPower)
+Instance.new("UICorner", jumpBox)
+
+jumpBox.FocusLost:Connect(function()
+	local val = tonumber(jumpBox.Text)
+	if val and val >= 1 and val <= 100 then
+		jumpPower = val
+		jumpLabel.Text = "Jump Power: "..jumpPower
+		if highJump then hum.JumpPower = jumpPower end
+	else
+		jumpBox.Text = tostring(jumpPower)
+	end
+end)
+
+-- ===== ESP =====
+local esp = false
+local highlights = {}
+
+local espBtn = Instance.new("TextButton", main)
+espBtn.Size = UDim2.fromOffset(180,32)
+espBtn.Position = UDim2.fromOffset(220,150)
+espBtn.Text = "ESP"
+espBtn.BackgroundColor3 = Color3.fromRGB(255,200,180)
+espBtn.TextColor3 = Color3.new(1,1,1)
+Instance.new("UICorner", espBtn)
+
+local function toggleESP(state)
+	for _,plr in pairs(Players:GetPlayers()) do
+		if plr ~= player and plr.Character then
+			if state then
+				if not highlights[plr] then
+					local h = Instance.new("Highlight")
+					h.FillTransparency = 0.5
+					h.OutlineColor = Color3.fromRGB(255,120,160)
+					h.Parent = plr.Character
+					highlights[plr] = h
+				end
+			else
+				if highlights[plr] then
+					highlights[plr]:Destroy()
+					highlights[plr] = nil
+				end
+			end
+		end
+	end
+end
+
+espBtn.MouseButton1Click:Connect(function()
+	esp = not esp
+	toggleESP(esp)
 end)
