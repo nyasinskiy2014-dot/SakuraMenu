@@ -83,6 +83,11 @@ end)
 -- ===== FLY =====
 local fly = false
 local flySpeed = 3
+local flyVel = Instance.new("BodyVelocity")
+flyVel.MaxForce = Vector3.new(1e5,1e5,1e5)
+flyVel.Velocity = Vector3.new(0,0,0)
+flyVel.Parent = root
+flyVel.Enabled = false
 
 local flyBtn = Instance.new("TextButton", main)
 flyBtn.Size = UDim2.fromOffset(180,32)
@@ -94,4 +99,92 @@ Instance.new("UICorner", flyBtn)
 
 flyBtn.MouseButton1Click:Connect(function()
 	fly = not fly
-	flyBtn.Text = fly and "Fly: ON"
+	flyBtn.Text = fly and "Fly: ON" or "Fly: OFF"
+	flyVel.Enabled = fly
+end)
+
+-- Fly speed текст
+local flyLabel = Instance.new("TextLabel", main)
+flyLabel.Size = UDim2.fromOffset(180,20)
+flyLabel.Position = UDim2.fromOffset(20,95)
+flyLabel.BackgroundTransparency = 1
+flyLabel.TextColor3 = Color3.fromRGB(120,60,80)
+flyLabel.TextScaled = true
+flyLabel.Text = "Fly Speed: "..flySpeed
+
+-- Fly speed регулятор
+local flyBox = Instance.new("TextBox", main)
+flyBox.Size = UDim2.fromOffset(180,20)
+flyBox.Position = UDim2.fromOffset(20,115)
+flyBox.BackgroundColor3 = Color3.fromRGB(255,200,220)
+flyBox.TextColor3 = Color3.new(1,1,1)
+flyBox.Text = tostring(flySpeed)
+Instance.new("UICorner", flyBox)
+
+flyBox.FocusLost:Connect(function()
+	local val = tonumber(flyBox.Text)
+	if val and val >= 1 and val <= 100 then
+		flySpeed = val
+		flyLabel.Text = "Fly Speed: "..flySpeed
+	else
+		flyBox.Text = tostring(flySpeed)
+	end
+end)
+
+RunService.RenderStepped:Connect(function()
+	if fly then
+		local dir = Vector3.new(0,0,0)
+		if uis:IsKeyDown(Enum.KeyCode.W) then dir += root.CFrame.LookVector end
+		if uis:IsKeyDown(Enum.KeyCode.S) then dir -= root.CFrame.LookVector end
+		if uis:IsKeyDown(Enum.KeyCode.A) then dir -= root.CFrame.RightVector end
+		if uis:IsKeyDown(Enum.KeyCode.D) then dir += root.CFrame.RightVector end
+		if uis:IsKeyDown(Enum.KeyCode.Space) then dir += Vector3.new(0,1,0) end
+		if uis:IsKeyDown(Enum.KeyCode.LeftControl) then dir -= Vector3.new(0,1,0) end
+		flyVel.Velocity = dir.Magnitude > 0 and dir.Unit * flySpeed or Vector3.new(0,0,0)
+	end
+end)
+
+-- ===== SPEED BOOST =====
+local speedBoost = false
+local boostSpeed = 16 -- обычная скорость
+
+local speedBtn = Instance.new("TextButton", main)
+speedBtn.Size = UDim2.fromOffset(180,32)
+speedBtn.Position = UDim2.fromOffset(220,60)
+speedBtn.Text = "Speed Boost: OFF"
+speedBtn.BackgroundColor3 = Color3.fromRGB(255,180,200)
+speedBtn.TextColor3 = Color3.new(1,1,1)
+Instance.new("UICorner", speedBtn)
+
+speedBtn.MouseButton1Click:Connect(function()
+	speedBoost = not speedBoost
+	speedBtn.Text = speedBoost and "Speed Boost: ON" or "Speed Boost: OFF"
+	hum.WalkSpeed = speedBoost and boostSpeed or 16
+end)
+
+local speedLabel = Instance.new("TextLabel", main)
+speedLabel.Size = UDim2.fromOffset(180,20)
+speedLabel.Position = UDim2.fromOffset(220,95)
+speedLabel.BackgroundTransparency = 1
+speedLabel.TextColor3 = Color3.fromRGB(120,60,80)
+speedLabel.TextScaled = true
+speedLabel.Text = "Speed: "..boostSpeed
+
+local speedBox = Instance.new("TextBox", main)
+speedBox.Size = UDim2.fromOffset(180,20)
+speedBox.Position = UDim2.fromOffset(220,115)
+speedBox.BackgroundColor3 = Color3.fromRGB(255,200,220)
+speedBox.TextColor3 = Color3.new(1,1,1)
+speedBox.Text = tostring(boostSpeed)
+Instance.new("UICorner", speedBox)
+
+speedBox.FocusLost:Connect(function()
+	local val = tonumber(speedBox.Text)
+	if val and val >= 16 and val <= 100 then
+		boostSpeed = val
+		speedLabel.Text = "Speed: "..boostSpeed
+		if speedBoost then hum.WalkSpeed = boostSpeed end
+	else
+		speedBox.Text = tostring(boostSpeed)
+	end
+end)
